@@ -1,0 +1,94 @@
+﻿@page "/EnergyExports/edit"
+@inject UPQC_RemoteMonitoring.Data.ApplicationDbContext DB
+@using UPQC_RemoteMonitoring.Models
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h4>EnergyExport</h4>
+<hr />
+@if (EnergyExport is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="EnergyExport" OnValidSubmit="UpdateEnergyExport" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="EnergyExport.Id" value="@EnergyExport.Id" />
+                <div class="mb-3">
+                    <label for="energyexported" class="form-label">EnergyExported:</label>
+                    <InputNumber id="energyexported" @bind-Value="EnergyExport.EnergyExported" class="form-control" />
+                    <ValidationMessage For="() => EnergyExport.EnergyExported" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date:</label>
+                    <InputDate id="date" @bind-Value="EnergyExport.Date" class="form-control" />
+                    <ValidationMessage For="() => EnergyExport.Date" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/energyexports">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public EnergyExport? EnergyExport { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        EnergyExport ??= await DB.EnergyExport.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (EnergyExport is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task UpdateEnergyExport()
+    {
+        DB.Attach(EnergyExport!).State = EntityState.Modified;
+
+        try
+        {
+            await DB.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!EnergyExportExists(EnergyExport!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/energyexports");
+    }
+
+    bool EnergyExportExists(int id)
+    {
+        return DB.EnergyExport.Any(e => e.Id == id);
+    }
+}

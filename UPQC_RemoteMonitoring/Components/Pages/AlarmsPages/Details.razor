@@ -1,0 +1,58 @@
+﻿@page "/alarms/details"
+@inject UPQC_RemoteMonitoring.Data.ApplicationDbContext DB
+@using UPQC_RemoteMonitoring.Models
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h4>Alarms</h4>
+    <hr />
+    @if (alarms is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Voltage</dt>
+            <dd class="col-sm-10">@alarms.Voltage</dd>
+            <dt class="col-sm-2">Current</dt>
+            <dd class="col-sm-10">@alarms.Current</dd>
+            <dt class="col-sm-2">Energy</dt>
+            <dd class="col-sm-10">@alarms.Energy</dd>
+            <dt class="col-sm-2">PowerFactor</dt>
+            <dd class="col-sm-10">@alarms.PowerFactor</dd>
+            <dt class="col-sm-2">Power</dt>
+            <dd class="col-sm-10">@alarms.Power</dd>
+            <dt class="col-sm-2">Timestamp</dt>
+            <dd class="col-sm-10">@alarms.Timestamp</dd>
+        </dl>
+        <div>
+            <a href="@($"/alarms/edit?id={alarms.Id}")">Edit</a> |
+            <a href="@($"/alarms")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    Alarms? alarms;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        alarms = await DB.Alarms.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (alarms is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

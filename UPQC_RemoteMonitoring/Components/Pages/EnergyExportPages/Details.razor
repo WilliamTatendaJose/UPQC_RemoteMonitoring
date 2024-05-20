@@ -1,0 +1,50 @@
+﻿@page "/energyexports/details"
+@inject UPQC_RemoteMonitoring.Data.ApplicationDbContext DB
+@using UPQC_RemoteMonitoring.Models
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h4>EnergyExport</h4>
+    <hr />
+    @if (energyexport is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">EnergyExported</dt>
+            <dd class="col-sm-10">@energyexport.EnergyExported</dd>
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@energyexport.Date</dd>
+        </dl>
+        <div>
+            <a href="@($"/energyexports/edit?id={energyexport.Id}")">Edit</a> |
+            <a href="@($"/energyexports")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    EnergyExport? energyexport;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        energyexport = await DB.EnergyExport.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (energyexport is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

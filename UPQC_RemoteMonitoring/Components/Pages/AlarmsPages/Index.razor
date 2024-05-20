@@ -1,0 +1,24 @@
+﻿@page "/alarms"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject UPQC_RemoteMonitoring.Data.ApplicationDbContext DB
+@using UPQC_RemoteMonitoring.Models
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Index</PageTitle>
+
+<h1>Review Alarms Raised Due to Abnormal System Parameters</h1>
+<br />
+
+
+
+<QuickGrid Class="table" Items="DB.Alarms">
+    <PropertyColumn Property="alarms => alarms.Voltage" />
+    <PropertyColumn Property="alarms => alarms.Current" />
+    <PropertyColumn Property="alarms => alarms.Energy" />
+    <PropertyColumn Property="alarms => alarms.PowerFactor" />
+    <PropertyColumn Property="alarms => alarms.Power" />
+    <PropertyColumn Property="alarms => alarms.Timestamp" />
+
+</QuickGrid>
