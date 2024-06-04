@@ -1,16 +1,18 @@
 ﻿@page "/alarms"
+@using ClosedXML.Excel
 @using Microsoft.AspNetCore.Components.QuickGrid
 @inject UPQC_RemoteMonitoring.Data.ApplicationDbContext DB
+@using System.Data
 @using UPQC_RemoteMonitoring.Models
 @using Microsoft.AspNetCore.Authorization
-
+@inject IJSRuntime JS
 @attribute [Authorize]
+@rendermode InteractiveServer
 
 <PageTitle>Index</PageTitle>
 
 <h1>Review Alarms Raised Due to Abnormal System Parameters</h1>
 <br />
-
 
 
 <QuickGrid Class="table" Items="DB.Alarms">
@@ -22,3 +24,65 @@
     <PropertyColumn Property="alarms => alarms.Timestamp" />
 
 </QuickGrid>
+
+
+@code{
+    private List<Alarms> alarm = new();
+
+    protected override void OnInitialized()
+    {
+        alarm = DB.Alarms.ToList();
+    }
+
+    public async Task  ExportToExcel()
+    {
+        var spreadSheetByte = AlarmsToBytes();
+        SaveSpreadSheetBytes(spreadSheetByte);
+        await DownloadFileFromUrl();
+    }
+    private void SaveSpreadSheetBytes(byte [] bytes)
+    {
+        File.WriteAllBytes(path: "./wwwroot/exports/alarms.xlsx", bytes);
+    }
+
+
+    private byte[] AlarmsToBytes()
+    {
+        using var workbook = new XLWorkbook();
+        var dataTable = new DataTable();
+        dataTable.Columns.Add(new DataColumn("Voltage"));
+        dataTable.Columns.Add(new DataColumn("Current"));
+        dataTable.Columns.Add(new DataColumn("Power Factor"));
+        dataTable.Columns.Add(new DataColumn("Energy"));
+        dataTable.Columns.Add(new DataColumn("Power"));
+        dataTable.Columns.Add(new DataColumn("Timestamp"));
+
+        alarm.ForEach(x=>
+        {
+            var newRow = dataTable.NewRow();
+            newRow["Voltage"] = x.Voltage;
+            newRow["Current"] = x.Current;
+            newRow["Power Factor"] = x.PowerFactor;
+            newRow["Power"] = x.Power;
+            newRow["Energy"] = x.Energy;
+            newRow["Timestamp"] = x.Timestamp;
+            dataTable.Rows.Add(newRow);
+
+        }
+        );
+        var workSheet = workbook.Worksheets.Add(dataTable, "Alarms");
+        using var memoryStream = new MemoryStream();
+        workbook.SaveAs(memoryStream);
+        return memoryStream.ToArray();
+
+
+    }
+
+    private async Task DownloadFileFromUrl()
+    {
+        var fileName = "alarms.xlsx";
+        var fileUrl = "https://localhost:7071/exports/alarms.xlsx";
+        await JS.InvokeVoidAsync("triggerFileDownload", fileName, fileUrl);
+    }
+
+}

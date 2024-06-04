@@ -109,8 +109,8 @@
 
 
 @code {
-	
-	
+
+
 	private HubConnection hubConnection; //for connecting to SignalR
 	private List<TelemetryPayload> messages = new(); //List of messages to display
 
@@ -120,15 +120,15 @@
 
 	protected override async Task OnInitializedAsync() //actions to do when the page is initialized
 	{
-		//create a hub connection to the function app as we'll go via the function for everything SignalR.
+	//create a hub connection to the function app as we'll go via the function for everything SignalR.
 		hubConnection = new HubConnectionBuilder()
 			.WithUrl(functionAppBaseUri)
 			.Build();
 
-		//Registers handler that will be invoked when the hub method with the specified method name is invoked.
+        //Registers handler that will be invoked when the hub method with the specified method name is invoked.
 		hubConnection.On<TelemetryPayload>("telemetryPayload", (telemetryPayload) =>
 		{
-			//telemetryPayload.Timestamp = DateTime.Now;
+		//telemetryPayload.Timestamp = DateTime.Now;
 			messages.Add(telemetryPayload);
 			StateHasChanged(); //This tells Blazor that the UI needs to be updated
 		});
@@ -160,7 +160,7 @@
 		public double PowerFactor { get; set; }
 		public double Power { get; set; }
 		public DateTime Timestamp { get; set; }
-
-	}
+		
+    }
 
 }

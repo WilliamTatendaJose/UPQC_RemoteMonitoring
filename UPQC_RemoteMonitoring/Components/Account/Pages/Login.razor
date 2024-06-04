@@ -14,8 +14,8 @@
 <PageTitle>Log in</PageTitle>
 
 <h1>Log in</h1>
-<FluentGrid>
-    <FluentGridItem xs="8" sm="12">
+<FluentGrid AdaptiveRendering="true" Style="align-items:flex-end">
+    <FluentGridItem xs="12" sm="12">
         <StatusMessage Message="@errorMessage" />
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator />
